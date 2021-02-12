@@ -4,6 +4,11 @@
 TaskGraph Release History
 =========================
 
+Unreleased Changes
+------------------
+* Addressing an intermittent ``EOFError`` seen on mac resulting from a broken
+  pipe at graph shutdown.
+
 0.10.3 (2021-01-29)
 -------------------
 * Fixed issue that could cause combinatorial memory usage leading to poor
