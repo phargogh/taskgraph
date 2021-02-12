@@ -407,8 +407,10 @@ class TaskGraph(object):
                 # Close down the logging monitor thread.
                 self._logging_queue.put(None)
                 self._logging_monitor_thread.join(_MAX_TIMEOUT)
+
                 # drain the queue if anything is left
-                while True:
+                # If the join() timed out, then it'll still be alive.
+                while True and self._logging_monitor_thread.is_alive():
                     try:
                         x = self._logging_queue.get_nowait()
                         LOGGER.debug(
