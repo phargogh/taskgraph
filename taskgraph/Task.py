@@ -14,6 +14,7 @@ import queue
 import sqlite3
 import threading
 import time
+
 try:
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version
@@ -59,6 +60,11 @@ _MAX_TIMEOUT = 5.0  # amount of time to wait for threads to terminate
 class NoDaemonProcess(multiprocessing.Process):
     """Make 'daemon' attribute always return False."""
 
+    def run(self):
+        import faulthandler
+        faulthandler.enable()
+        super(NoDaemonProcess, self).run()
+
     @property
     def daemon(self):
         """Return False indicating not a daemon process."""
@@ -68,6 +74,18 @@ class NoDaemonProcess(multiprocessing.Process):
     def daemon(self, value):
         """Do not allow daemon value to be overriden."""
         pass
+
+    def terminate(self):
+        LOGGER.info(f"Terminating process {self.pid}")
+        return super(NoDaemonProcess, self)
+
+    def kill(self):
+        LOGGER.info(f"Killing process {self.pid}")
+        return super(NoDaemonProcess, self)
+
+    def join(self):
+        LOGGER.info(f"Joining process {self.pid}")
+        return super(NoDaemonProcess, self)
 
 
 class NoDaemonContext(type(multiprocessing.get_context('spawn'))):
