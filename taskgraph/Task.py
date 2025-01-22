@@ -14,6 +14,7 @@ import queue
 import sqlite3
 import threading
 import time
+
 try:
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version
@@ -748,15 +749,28 @@ class TaskGraph(object):
                 percent_complete = 100.0 * (
                     float(completed_tasks) / self._added_task_count)
 
+            remaining_tasks = list(
+                task.task_name for task in
+                collections.deque(self._task_ready_priority_queue.queue))
+            remaining_tasks_message = '\n'.join(
+                ['\t\t%s' % task_name for task_name in remaining_tasks])
+
             LOGGER.info(
                 "\n\ttaskgraph execution status: tasks added: %d \n"
                 "\ttasks complete: %d (%.1f%%) \n"
                 "\ttasks waiting for a free worker: %d (qsize: %d)\n"
-                "\ttasks executing (%d): graph is %s\n%s",
-                self._added_task_count, completed_tasks, percent_complete,
-                self._task_waiting_count, queue_length, active_task_count,
+                "\ttasks executing (%d): graph is %s\n%s\n"
+                "\ttasks remaining:\n%s",
+                self._added_task_count,
+                completed_tasks,
+                percent_complete,
+                self._task_waiting_count,
+                queue_length,
+                active_task_count,
                 'closed' if self._closed else 'open',
-                active_task_message)
+                active_task_message,
+                remaining_tasks_message
+            )
 
             monitor_wait_event.wait(
                 timeout=self._reporting_interval - (
